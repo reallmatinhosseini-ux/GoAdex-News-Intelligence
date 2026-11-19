@@ -414,6 +414,19 @@ def _page(name: str) -> HTMLResponse:
     return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    from fastapi.responses import FileResponse
+    return FileResponse(WEB / "favicon.ico", media_type="image/x-icon", headers={"Cache-Control": "public, max-age=604800"})
+
+
+@app.get("/apple-touch-icon.png", include_in_schema=False)
+@app.get("/apple-touch-icon-precomposed.png", include_in_schema=False)
+def apple_icon():
+    from fastapi.responses import FileResponse
+    return FileResponse(WEB / "apple-touch-icon.png", media_type="image/png", headers={"Cache-Control": "public, max-age=604800"})
+
+
 @app.get("/")
 def landing():
     return _page("landing.html")

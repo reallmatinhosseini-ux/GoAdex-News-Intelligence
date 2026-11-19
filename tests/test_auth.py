@@ -111,3 +111,13 @@ def test_proxy_awareness_and_cors():
     adm = c.options("/api/admin/waitlist", headers={"Origin": "https://www.goadex.com", "Access-Control-Request-Method": "GET"})
     assert "access-control-allow-origin" not in adm.headers  # admin APIs are never cross-origin
     assert "access-control-allow-credentials" not in ok.headers
+
+
+def test_icons_served_without_login():
+    c = client()
+    ico = c.get("/favicon.ico")
+    assert ico.status_code == 200 and ico.headers["content-type"] == "image/x-icon"
+    assert c.get("/apple-touch-icon.png").status_code == 200
+    for p in ("/static/favicon.svg", "/static/site.webmanifest", "/static/icon-192.png"):
+        assert c.get(p).status_code == 200, p
+    assert '<link rel="icon" href="/static/favicon.svg"' in c.get("/").text
