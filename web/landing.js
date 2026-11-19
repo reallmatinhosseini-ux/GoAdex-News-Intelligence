@@ -164,12 +164,24 @@
       ctx.clearRect(0, 0, W, H);
       empty.hidden = pts.length > 1;
       if (pts.length < 2) return;
-      const t0 = pts[0][0], t1 = pts[pts.length - 1][0];
+      // Time axis with recording gaps (> 5 min, e.g. the recorder was offline) collapsed to a short
+      // spacer, so the line stays readable and missing data is marked instead of drawn.
+      const GAP = 300, u = [0], gapAt = [];
+      let normal = 0;
+      for (let i = 1; i < pts.length; i++) { const dt = pts[i][0] - pts[i - 1][0]; if (dt <= GAP) normal += dt; }
+      const spacer = Math.max(60, normal * 0.025);
+      for (let i = 1; i < pts.length; i++) {
+        const dt = pts[i][0] - pts[i - 1][0];
+        if (dt > GAP) gapAt.push(i);
+        u.push(u[i - 1] + (dt > GAP ? spacer : dt));
+      }
+      const U = Math.max(1, u[u.length - 1]);
       let lo = Infinity, hi = -Infinity;
       pts.forEach((p) => { lo = Math.min(lo, p[1]); hi = Math.max(hi, p[1]); });
       const pad = (hi - lo) * 0.18 || hi * 0.0005; lo -= pad; hi += pad;
-      const X = (t) => 4 + ((t - t0) / Math.max(1, t1 - t0)) * (W - 64);
-      const Y = (v) => 8 + (1 - (v - lo) / (hi - lo)) * (H - 30);
+      const T = 26, B = H - 8;
+      const X = (i) => 4 + (u[i] / U) * (W - 64);
+      const Y = (v) => T + (1 - (v - lo) / (hi - lo)) * (B - T);
       const up = pts[pts.length - 1][1] >= pts[0][1];
       const col = up ? "14,150,112" : "212,70,62";
       ctx.font = "500 11px Inter, sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
@@ -179,40 +191,47 @@
         ctx.fillStyle = "#8b8880"; ctx.fillText(v.toFixed(inst === "XAUUSD" ? 1 : 4), W - 52, y);
       }
       const n = Math.max(2, Math.floor(pts.length * drawK));
-      const vis = pts.slice(0, n);
-      // split at recording gaps (> 5 min) so missing data is never drawn as a fake line
-      const segs = [[]];
-      vis.forEach((p, i) => { if (i && p[0] - vis[i - 1][0] > 300) segs.push([]); segs[segs.length - 1].push(p); });
-      const last = vis[vis.length - 1];
-      const grad = ctx.createLinearGradient(0, 0, 0, H);
+      const gaps = new Set(gapAt);
+      const segs = [[0]];
+      for (let i = 1; i < n; i++) { if (gaps.has(i)) segs.push([]); segs[segs.length - 1].push(i); }
+      const grad = ctx.createLinearGradient(0, T, 0, H);
       grad.addColorStop(0, `rgba(${col},.18)`); grad.addColorStop(1, `rgba(${col},0)`);
+      // gap markers: dotted connector + faint band where no prices were recorded
+      for (const g of gapAt) {
+        if (g >= n) break;
+        const x0 = X(g - 1), x1 = X(g);
+        ctx.fillStyle = "rgba(24,22,18,.035)"; ctx.fillRect(x0, T, x1 - x0, B - T);
+        ctx.save(); ctx.setLineDash([2, 4]); ctx.strokeStyle = "rgba(24,22,18,.28)"; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(x0, Y(pts[g - 1][1])); ctx.lineTo(x1, Y(pts[g][1])); ctx.stroke(); ctx.restore();
+      }
       segs.forEach((sg) => {
-        if (sg.length < 2) return;
+        if (!sg.length) return;
+        if (sg.length === 1) { ctx.fillStyle = `rgb(${col})`; ctx.beginPath(); ctx.arc(X(sg[0]), Y(pts[sg[0]][1]), 1.6, 0, Math.PI * 2); ctx.fill(); return; }
         ctx.beginPath();
-        sg.forEach((p, i) => (i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1]))));
-        ctx.lineTo(X(sg[sg.length - 1][0]), H); ctx.lineTo(X(sg[0][0]), H); ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+        sg.forEach((i, k) => (k ? ctx.lineTo(X(i), Y(pts[i][1])) : ctx.moveTo(X(i), Y(pts[i][1]))));
+        ctx.lineTo(X(sg[sg.length - 1]), H); ctx.lineTo(X(sg[0]), H); ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
         ctx.beginPath();
-        sg.forEach((p, i) => (i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1]))));
+        sg.forEach((i, k) => (k ? ctx.lineTo(X(i), Y(pts[i][1])) : ctx.moveTo(X(i), Y(pts[i][1]))));
         ctx.strokeStyle = `rgb(${col})`; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.stroke();
       });
       if (drawK >= 1) {
-        const lx = X(last[0]), ly = Y(last[1]), ph = (performance.now() % 2000) / 2000;
+        const li = pts.length - 1, lx = X(li), ly = Y(pts[li][1]), ph = (performance.now() % 2000) / 2000;
         ctx.beginPath(); ctx.arc(lx, ly, 4 + ph * 12, 0, Math.PI * 2); ctx.fillStyle = `rgba(${col},${0.35 * (1 - ph)})`; ctx.fill();
         ctx.beginPath(); ctx.arc(lx, ly, 4.5, 0, Math.PI * 2); ctx.fillStyle = "#fff"; ctx.fill();
         ctx.lineWidth = 2.5; ctx.strokeStyle = `rgb(${col})`; ctx.stroke();
       }
-      if (hoverX != null && drawK >= 1) {
-        let best = pts[0];
-        for (const p of pts) if (Math.abs(X(p[0]) - hoverX) < Math.abs(X(best[0]) - hoverX)) best = p;
-        const hx = X(best[0]), hy = Y(best[1]);
+      if (hoverX != null && drawK >= 1 && hoverX <= W - 58) {
+        let bi = 0;
+        for (let i = 1; i < pts.length; i++) if (Math.abs(X(i) - hoverX) < Math.abs(X(bi) - hoverX)) bi = i;
+        const best = pts[bi], hx = X(bi), hy = Y(best[1]);
         ctx.setLineDash([3, 4]); ctx.strokeStyle = "rgba(24,22,18,.3)"; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(hx, 0); ctx.lineTo(hx, H - 18); ctx.stroke(); ctx.setLineDash([]);
+        ctx.beginPath(); ctx.moveTo(hx, T - 4); ctx.lineTo(hx, H); ctx.stroke(); ctx.setLineDash([]);
         ctx.beginPath(); ctx.arc(hx, hy, 5, 0, Math.PI * 2); ctx.fillStyle = "#fff"; ctx.fill(); ctx.strokeStyle = "#15140f"; ctx.lineWidth = 2; ctx.stroke();
-        const label = `${best[1].toFixed(inst === "XAUUSD" ? 2 : 5)}  ·  ${new Date(best[0] * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-        ctx.font = "600 11.5px Inter, sans-serif";
+        const label = `${best[1].toFixed(inst === "XAUUSD" ? 2 : 5)}  ·  ${new Date(best[0] * 1000).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" })}`;
+        ctx.font = "600 11.5px Inter, sans-serif"; ctx.textBaseline = "middle";
         const tw = ctx.measureText(label).width + 16, tx = Math.min(Math.max(hx - tw / 2, 0), W - tw - 58);
-        ctx.fillStyle = "#15140f"; ctx.beginPath(); ctx.roundRect(tx, H - 18, tw, 18, 6); ctx.fill();
-        ctx.fillStyle = "#fff"; ctx.textAlign = "left"; ctx.fillText(label, tx + 8, H - 9);
+        ctx.fillStyle = "#15140f"; ctx.beginPath(); ctx.roundRect(tx, 1, tw, 20, 6); ctx.fill();
+        ctx.fillStyle = "#fff"; ctx.textAlign = "left"; ctx.fillText(label, tx + 8, 11.5);
       }
     };
     const loop = () => { if (!document.hidden) draw(); requestAnimationFrame(loop); };

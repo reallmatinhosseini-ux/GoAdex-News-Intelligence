@@ -74,25 +74,25 @@ def send_email(subject: str, body: str, reply_to: str | None = None) -> bool:
         return False
 
 
-def email_async(subject: str, body: str, reply_to: str | None = None):
+def email_async(subject: str, body: str, reply_to: str | None = None) -> None:
     threading.Thread(target=send_email, args=(subject, body, reply_to), daemon=True, name="email-alert").start()
 
 
-def waitlist_signup(email: str, interest: str, source: str):
+def waitlist_signup(email: str, interest: str, source: str, wait: bool = False) -> bool | None:
     labels = {"both": "Gold & EUR/USD", "gold": "Gold", "eurusd": "EUR/USD"}
     desktop("New waitlist sign-up", email)
-    email_async(f"GoAdex · New waitlist sign-up: {email}",
+    return (send_email if wait else email_async)(f"GoAdex · New waitlist sign-up: {email}",
                 f"Someone joined the GoAdex early-access waitlist.\n\n"
                 f"Email:    {email}\nMarket:   {labels.get(interest, interest or '—')}\nSource:   {source or '—'}\n\n"
                 f"See all sign-ups in the admin app → Waitlist & investors.\n", reply_to=email)
 
 
-def investor_interest(d: dict, types: dict):
+def investor_interest(d: dict, types: dict, wait: bool = False) -> bool | None:
     tickets = {"under_100k": "Under $100k", "100k_500k": "$100k – $500k", "500k_2m": "$500k – $2m",
                "2m_plus": "Over $2m", "undisclosed": "To be discussed", "": "Prefer not to say"}
     who = d.get("organization") or d.get("name")
     desktop("New investor interest", f"{d.get('name')} · {who}")
-    email_async(f"GoAdex · Investor interest from {d.get('name')}" + (f" ({d.get('organization')})" if d.get("organization") else ""),
+    return (send_email if wait else email_async)(f"GoAdex · Investor interest from {d.get('name')}" + (f" ({d.get('organization')})" if d.get("organization") else ""),
                 "A new expression of interest was submitted on /investors.\n\n"
                 f"Name:          {d.get('name')}\nEmail:         {d.get('email')}\n"
                 f"Organization:  {d.get('organization') or '—'}\nRole:          {d.get('role') or '—'}\n"

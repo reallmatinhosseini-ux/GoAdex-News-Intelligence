@@ -1,0 +1,10 @@
+data/
+.env
+.env.*
+tests/
+*.db
+__pycache__/
+install-service.sh
+uninstall-service.sh
+run.sh
+publish-site.sh

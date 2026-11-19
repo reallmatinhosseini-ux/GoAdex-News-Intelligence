@@ -18,7 +18,11 @@ ANTHROPIC_MODEL = _env("ANTHROPIC_MODEL", "claude-opus-5-5")
 LLM_WEB_RESEARCH = _env("LLM_WEB_RESEARCH", "1") == "1"
 
 DEFAULT_TIMEZONE = _env("DEFAULT_TIMEZONE", "Asia/Dubai")
-DB_PATH = ROOT / _env("DB_PATH", "data/intel.db")
+# Serverless hosts (Vercel / AWS Lambda) have a read-only code directory and no long-running process:
+# the app then runs as the public website only (no recorder/scheduler) and keeps scratch data in /tmp.
+SERVERLESS = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+DB_PATH = ROOT / _env("DB_PATH", "/tmp/goadex/intel.db" if SERVERLESS else "data/intel.db")
+SNAPSHOT_PATH = ROOT / "snapshot" / "public.json"
 
 # Model / pipeline versioning — stored on every forecast so the archive is auditable.
 ENGINE_VERSION = "3.0.0"

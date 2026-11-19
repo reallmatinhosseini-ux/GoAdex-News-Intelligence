@@ -21,14 +21,40 @@ WEB = config.ROOT / "web"
 worker = scheduler.Worker(n_threads=2)
 
 
-@asynccontextmanager
-async def lifespan(app):
+log = logging.getLogger("main")
+_ready = False
+UNAVAILABLE = "Sign-ups are temporarily unavailable. Please try again a little later."
+
+
+def _init_storage():
+    global _ready
+    if _ready:
+        return
     db.init()
     auth.init()
-    R.register_all()
-    worker.start()
-    recorder.start(worker.stop)
-    newsfeed.start(worker.stop)
+    try:
+        R.register_all()
+    except Exception as e:  # provider bookkeeping must never stop the site from serving
+        log.warning("provider registration failed: %s", e)
+    _ready = True
+
+
+def _snapshot() -> dict:
+    """Public figures published from the main (always-on) instance; used when running serverless."""
+    import json
+    try:
+        return json.loads(config.SNAPSHOT_PATH.read_text())
+    except Exception:
+        return {}
+
+
+@asynccontextmanager
+async def lifespan(app):
+    _init_storage()
+    if not config.SERVERLESS:  # background engine needs a long-running process
+        worker.start()
+        recorder.start(worker.stop)
+        newsfeed.start(worker.stop)
     yield
     worker.stop.set()
 
@@ -48,6 +74,8 @@ def _client_ip(request: Request) -> str:
 
 @app.middleware("http")
 async def guard(request: Request, call_next):
+    if not _ready:
+        _init_storage()
     path = request.url.path
     if path.startswith("/api/"):
         if request.method not in ("GET", "HEAD", "OPTIONS"):
@@ -405,7 +433,11 @@ def api_waitlist(request: Request, email: str = Body(...), name: str = Body(""),
         return JSONResponse({"detail": str(e)}, status_code=429)
     if st == "added":
         from . import notify
-        notify.waitlist_signup(email.strip().lower(), interest, source)
+        if config.SERVERLESS:  # no persistent disk: the email is the durable record, so it must go out
+            if not notify.waitlist_signup(email.strip().lower(), interest, source, wait=True):
+                return JSONResponse({"detail": UNAVAILABLE}, status_code=503)
+        else:
+            notify.waitlist_signup(email.strip().lower(), interest, source)
     return {"ok": True, "status": st}
 
 
@@ -426,6 +458,14 @@ def public_overview():
     """Public, forecast-free facts for the website: recorded prices (12 h), releases inside that window,
     upcoming release names/times and real counts. No predictions or evidence are exposed."""
     now = db.now_utc()
+    if config.SERVERLESS:
+        snap = _snapshot().get("overview") or {}
+        cut, now_s = int((now - timedelta(hours=12)).timestamp()), db.iso(now)
+        return {"series": {k: [p for p in v if p[0] >= cut] for k, v in (snap.get("series") or {}).items()},
+                "events": [e for e in snap.get("events", []) if e["release_utc"] >= db.iso(now - timedelta(hours=12))],
+                "upcoming": [e for e in snap.get("upcoming", []) if e["release_utc"] > now_s],
+                "stats": snap.get("stats", {}), "window": [db.iso(now - timedelta(hours=12)), now_s],
+                "as_of": snap.get("as_of", now_s), "snapshot": True}
     start = now - timedelta(hours=12)
     since = int(start.timestamp())
     series = {}
@@ -463,6 +503,9 @@ def public_calendar(week: int = 0):
     now = db.now_utc()
     s0 = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
     s0 += timedelta(days=7 * max(-4, min(1, week)))
+    if config.SERVERLESS:
+        cal = (_snapshot().get("calendar") or {}).get(s0.strftime("%Y-%m-%d"))
+        return cal or {"start": db.iso(s0), "end": db.iso(s0 + timedelta(days=7)), "rows": [], "as_of": db.iso(now)}
     from .engine.features import TYPES
     d = calendar_api(start=s0.strftime("%Y-%m-%dT%H:%M:%S"), days=7)
     rows = [{k: r.get(k) for k in PUBLIC_CAL_FIELDS} | {"tracked": r.get("catalog_key") in TYPES}
@@ -473,6 +516,8 @@ def public_calendar(week: int = 0):
 @app.get("/api/public/metrics")
 def public_metrics():
     """Aggregate, out-of-sample validation status. No individual forecasts are exposed."""
+    if config.SERVERLESS and _snapshot().get("metrics"):
+        return _snapshot()["metrics"]
     from .engine import backtest, model
     out = {"gate": {"min_calls": model.MIN_OOS, "lower_bound": 0.5, "brier": 0.25}, "assets": {}}
     for a in ("XAUUSD", "EURUSD"):
@@ -495,6 +540,10 @@ def api_investor_interest(request: Request, name: str = Body(""), email: str = B
                           message: str = Body(""), website: str = Body("")):
     if website:  # honeypot
         return {"ok": True}
+    if config.SERVERLESS:
+        from . import notify
+        if not notify.email_ready():
+            return JSONResponse({"detail": "Submissions are temporarily unavailable. Please try again a little later."}, status_code=503)
     try:
         auth.submit_investor_interest(name, email, organization, role, investor_type, ticket, message, _client_ip(request))
     except ValueError as e:
@@ -502,9 +551,11 @@ def api_investor_interest(request: Request, name: str = Body(""), email: str = B
     except PermissionError as e:
         return JSONResponse({"detail": str(e)}, status_code=429)
     from . import notify
-    notify.investor_interest({"name": name.strip(), "email": email.strip().lower(), "organization": organization.strip(),
-                              "role": role.strip(), "investor_type": investor_type, "ticket": ticket,
-                              "message": message.strip()[:2000]}, auth.INVESTOR_TYPES)
+    sent = notify.investor_interest({"name": name.strip(), "email": email.strip().lower(), "organization": organization.strip(),
+                                     "role": role.strip(), "investor_type": investor_type, "ticket": ticket,
+                                     "message": message.strip()[:2000]}, auth.INVESTOR_TYPES, wait=config.SERVERLESS)
+    if config.SERVERLESS and not sent:
+        return JSONResponse({"detail": "Submissions are temporarily unavailable. Please try again a little later."}, status_code=503)
     return {"ok": True}
 
 
