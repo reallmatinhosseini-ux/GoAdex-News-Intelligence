@@ -437,10 +437,34 @@ def investors_page():
     return _page("investors.html")
 
 
+_admin_seen = {"ok": False, "at": 0.0}
+
+
+def _admin_online() -> bool:
+    """Is the admin server (the Mac, via Cloudflare Tunnel) reachable? Cached for 30 s."""
+    import time
+    import httpx
+    if time.time() - _admin_seen["at"] < 30:
+        return _admin_seen["ok"]
+    try:
+        ok = httpx.get(config.ADMIN_URL + "/api/public/spot", timeout=2.5).status_code == 200
+    except Exception:
+        ok = False
+    _admin_seen.update(ok=ok, at=time.time())
+    return ok
+
+
+def _to_admin(path: str):
+    """Hosted site: send sign-in to the admin server, or explain it is offline instead of a dead link."""
+    if config.ADMIN_URL and _admin_online():
+        return RedirectResponse(config.ADMIN_URL + path, status_code=307)
+    return _page("offline.html")
+
+
 @app.get("/login")
 def login_page(request: Request):
-    if config.SERVERLESS and config.ADMIN_URL:
-        return RedirectResponse(config.ADMIN_URL + "/login", status_code=307)
+    if config.SERVERLESS:
+        return _to_admin("/login")
     if auth.session_user(request.cookies.get(auth.SESSION_COOKIE)):
         return RedirectResponse("/app", status_code=303)
     return _page("login.html")
@@ -448,8 +472,8 @@ def login_page(request: Request):
 
 @app.get("/app")
 def app_page(request: Request):
-    if config.SERVERLESS and config.ADMIN_URL:
-        return RedirectResponse(config.ADMIN_URL + "/app", status_code=307)
+    if config.SERVERLESS:
+        return _to_admin("/app")
     if not auth.session_user(request.cookies.get(auth.SESSION_COOKIE)):
         return RedirectResponse("/login", status_code=303)
     return _page("index.html")

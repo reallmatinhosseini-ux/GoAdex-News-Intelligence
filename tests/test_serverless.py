@@ -20,7 +20,7 @@ out = {
   "metrics": sorted(c.get("/api/public/metrics").json().get("assets", {})),
   "calendar": c.get("/api/public/calendar").status_code,
   "protected": c.get("/api/home").status_code,
-  "login_redirect": c.get("/login", follow_redirects=False).headers.get("location"),
+  "login_offline": "Admin console offline" in c.get("/login", follow_redirects=False).text,
   "meta": 'name="goadex-api"' in c.get("/").text,
   "waitlist_no_email": c.post("/api/waitlist", json={"email": "a@b.co"}, headers=H).status_code,
   "investor_no_email": c.post("/api/investor-interest", json={"name": "A B", "email": "a@b.co", "investor_type": "vc"}, headers=H).status_code,
@@ -32,7 +32,7 @@ print(json.dumps(out))
 
 def test_vercel_mode():
     env = {k: v for k, v in os.environ.items() if not k.startswith(("SMTP_", "NOTIFY_EMAIL", "DB_PATH"))}
-    env.update(VERCEL="1", NOTIFY="0", TMPDIR=tempfile.mkdtemp())
+    env.update(VERCEL="1", NOTIFY="0", TMPDIR=tempfile.mkdtemp(), ADMIN_URL="https://admin.invalid")
     before = {p for p in ROOT.rglob("*") if "__pycache__" not in p.parts and ".pytest_cache" not in p.parts and ".git" not in p.parts}
     r = subprocess.run([sys.executable, "-c", SCRIPT], cwd=ROOT, env=env, capture_output=True, text=True, timeout=120)
     assert r.returncode == 0, r.stderr[-2000:]
@@ -41,7 +41,7 @@ def test_vercel_mode():
     assert out["home"] == out["investors"] == out["login"] == 200
     assert out["overview"] is True and out["metrics"] == ["EURUSD", "XAUUSD"] and out["calendar"] == 200
     assert out["protected"] == 401
-    assert out["login_redirect"] == "https://app.goadex.com/login" and out["meta"] is True
+    assert out["login_offline"] is True and out["meta"] is True  # admin host unreachable → explained, no dead link
     assert out["waitlist_no_email"] == 503 and out["investor_no_email"] == 503   # never a silent, lost sign-up
     assert out["db"].startswith("/tmp/")
     after = {p for p in ROOT.rglob("*") if "__pycache__" not in p.parts and ".pytest_cache" not in p.parts and ".git" not in p.parts}
