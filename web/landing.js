@@ -393,10 +393,16 @@
       const orig = label.textContent;
       btn.disabled = true; label.textContent = "Sending…";
       try {
-        const r = await fetch(url, {
+        const opts = {
           method: "POST", headers: { "Content-Type": "application/json", "X-Requested-With": "fetch" },
           body: JSON.stringify({ ...data, source: document.body.dataset.page || "landing" }),
-        });
+        };
+        // On the hosted site, deliver to the GoAdex server (where the admin app lives); fall back to
+        // this site's own endpoint (email delivery) if that server is unreachable.
+        const api = document.querySelector('meta[name="goadex-api"]')?.content;
+        let r = null;
+        if (api) { try { r = await fetch(api + url, { ...opts, mode: "cors" }); if (r.status >= 500) r = null; } catch { r = null; } }
+        if (!r) r = await fetch(url, opts);
         const j = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(j.detail || "Something went wrong. Please try again.");
         form.classList.add("done");

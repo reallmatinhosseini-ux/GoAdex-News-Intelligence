@@ -24,6 +24,12 @@ SERVERLESS = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTIO
 DB_PATH = ROOT / _env("DB_PATH", "/tmp/goadex/intel.db" if SERVERLESS else "data/intel.db")
 SNAPSHOT_PATH = ROOT / "snapshot" / "public.json"
 
+# Admin app served from the always-on machine through Cloudflare Tunnel. The public (Vercel) site sends
+# sign-in there and forwards waitlist / investor forms to it; the Mac accepts those cross-origin posts.
+ADMIN_URL = _env("ADMIN_URL", "https://app.goadex.com").rstrip("/")
+ALLOWED_ORIGINS = [o.strip().rstrip("/") for o in
+                   _env("ALLOWED_ORIGINS", "https://www.goadex.com,https://goadex.com").split(",") if o.strip()]
+
 # Model / pipeline versioning — stored on every forecast so the archive is auditable.
 ENGINE_VERSION = "3.0.0"
 

@@ -68,14 +68,54 @@ CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' 
        "base-uri 'self'; form-action 'self'")
 
 
+LOOPBACK = {"127.0.0.1", "::1", "localhost"}
+
+
+def _via_local_proxy(request: Request) -> bool:
+    """True when the request arrived through a proxy on this machine (cloudflared connects from loopback)."""
+    return bool(request.client and request.client.host in LOOPBACK)
+
+
 def _client_ip(request: Request) -> str:
+    # Behind Cloudflare Tunnel every request comes from 127.0.0.1; the real visitor is in CF-Connecting-IP.
+    # Trust that header only from the local proxy, so remote clients cannot spoof it.
+    if _via_local_proxy(request):
+        cf = request.headers.get("cf-connecting-ip", "").strip()
+        if cf:
+            return cf[:64]
     return request.client.host if request.client else "unknown"
+
+
+def _is_https(request: Request) -> bool:
+    if request.url.scheme == "https":
+        return True
+    return _via_local_proxy(request) and request.headers.get("x-forwarded-proto", "").lower() == "https"
+
+
+def _csp() -> str:
+    if config.SERVERLESS and config.ADMIN_URL:
+        return CSP.replace("connect-src 'self'", f"connect-src 'self' {config.ADMIN_URL}")
+    return CSP
+
+
+FORM_PATHS = {"/api/waitlist", "/api/investor-interest"}
+
+
+def _cors_origin(request: Request) -> str | None:
+    o = (request.headers.get("origin") or "").rstrip("/")
+    return o if o and o in config.ALLOWED_ORIGINS and request.url.path in FORM_PATHS else None
 
 
 @app.middleware("http")
 async def guard(request: Request, call_next):
     if not _ready:
         _init_storage()
+    origin = _cors_origin(request)
+    if request.method == "OPTIONS" and origin:
+        from fastapi.responses import Response
+        return Response(status_code=204, headers={
+            "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "POST",
+            "Access-Control-Allow-Headers": "Content-Type, X-Requested-With", "Access-Control-Max-Age": "600", "Vary": "Origin"})
     path = request.url.path
     if path.startswith("/api/"):
         if request.method not in ("GET", "HEAD", "OPTIONS"):
@@ -88,7 +128,10 @@ async def guard(request: Request, call_next):
     resp.headers["X-Content-Type-Options"] = "nosniff"
     resp.headers["X-Frame-Options"] = "DENY"
     resp.headers["Referrer-Policy"] = "same-origin"
-    resp.headers["Content-Security-Policy"] = CSP
+    if origin:
+        resp.headers["Access-Control-Allow-Origin"] = origin
+        resp.headers["Vary"] = "Origin"
+    resp.headers["Content-Security-Policy"] = _csp()
     if path.startswith("/api/"):
         resp.headers["Cache-Control"] = "no-store"
     return resp
@@ -366,6 +409,8 @@ def _page(name: str) -> HTMLResponse:
     html = (WEB / name).read_text()
     for f in ("app.js", "styles.css", "landing.js", "landing.css", "login.js", "investors.js", "site.js"):
         html = html.replace(f"/static/{f}", f"/static/{f}?v={v}")
+    if config.SERVERLESS and config.ADMIN_URL:
+        html = html.replace("<head>", f'<head>\n  <meta name="goadex-api" content="{config.ADMIN_URL}">', 1)
     return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
 
 
@@ -381,6 +426,8 @@ def investors_page():
 
 @app.get("/login")
 def login_page(request: Request):
+    if config.SERVERLESS and config.ADMIN_URL:
+        return RedirectResponse(config.ADMIN_URL + "/login", status_code=307)
     if auth.session_user(request.cookies.get(auth.SESSION_COOKIE)):
         return RedirectResponse("/app", status_code=303)
     return _page("login.html")
@@ -388,6 +435,8 @@ def login_page(request: Request):
 
 @app.get("/app")
 def app_page(request: Request):
+    if config.SERVERLESS and config.ADMIN_URL:
+        return RedirectResponse(config.ADMIN_URL + "/app", status_code=307)
     if not auth.session_user(request.cookies.get(auth.SESSION_COOKIE)):
         return RedirectResponse("/login", status_code=303)
     return _page("index.html")
@@ -403,7 +452,7 @@ def api_login(request: Request, email: str = Body(...), password: str = Body(...
         return JSONResponse({"detail": "Incorrect email or password."}, status_code=401)
     resp = JSONResponse({"ok": True})
     resp.set_cookie(auth.SESSION_COOKIE, token, max_age=auth.SESSION_DAYS * 86400, httponly=True, samesite="strict",
-                    secure=request.url.scheme == "https", path="/")
+                    secure=_is_https(request), path="/")
     return resp
 
 
@@ -425,6 +474,10 @@ def api_waitlist(request: Request, email: str = Body(...), name: str = Body(""),
                  note: str = Body(""), website: str = Body(""), source: str = Body("")):
     if website:  # honeypot field: real visitors never fill it
         return {"ok": True, "status": "added"}
+    if config.SERVERLESS:
+        from . import notify
+        if not notify.email_ready():
+            return JSONResponse({"detail": UNAVAILABLE}, status_code=503)
     try:
         st = auth.join_waitlist(email, name, interest, note, _client_ip(request), source)
     except ValueError as e:
@@ -435,6 +488,8 @@ def api_waitlist(request: Request, email: str = Body(...), name: str = Body(""),
         from . import notify
         if config.SERVERLESS:  # no persistent disk: the email is the durable record, so it must go out
             if not notify.waitlist_signup(email.strip().lower(), interest, source, wait=True):
+                with db.tx() as c:  # not delivered: forget it so a retry is treated as new
+                    c.execute("DELETE FROM waitlist WHERE email=?", (email.strip().lower(),))
                 return JSONResponse({"detail": UNAVAILABLE}, status_code=503)
         else:
             notify.waitlist_signup(email.strip().lower(), interest, source)

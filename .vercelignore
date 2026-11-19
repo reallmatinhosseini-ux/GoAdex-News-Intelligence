@@ -8,3 +8,5 @@ install-service.sh
 uninstall-service.sh
 run.sh
 publish-site.sh
+publish-site.sh
+setup-tunnel.sh

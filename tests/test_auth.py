@@ -90,3 +90,24 @@ def test_investor_interest_and_public_pages():
     assert "'=cmd" in c.get("/api/admin/investors.csv").text  # formula injection neutralised
     m = c.get("/api/public/metrics").json()
     assert "pred" not in str(m) and set(m["assets"]) == {"XAUUSD", "EURUSD"}
+
+
+def test_proxy_awareness_and_cors():
+    from starlette.requests import Request as R
+    from app import main
+    def req(host, headers):
+        return R({"type": "http", "method": "GET", "path": "/", "headers": [(k.encode(), v.encode()) for k, v in headers.items()],
+                  "client": (host, 1234), "scheme": "http", "server": ("x", 80), "query_string": b""})
+    # CF-Connecting-IP is trusted only from the local tunnel, never from a remote client
+    assert main._client_ip(req("127.0.0.1", {"cf-connecting-ip": "203.0.113.9"})) == "203.0.113.9"
+    assert main._client_ip(req("198.51.100.7", {"cf-connecting-ip": "203.0.113.9"})) == "198.51.100.7"
+    assert main._is_https(req("127.0.0.1", {"x-forwarded-proto": "https"})) is True
+    assert main._is_https(req("198.51.100.7", {"x-forwarded-proto": "https"})) is False
+    c = client()
+    ok = c.options("/api/waitlist", headers={"Origin": "https://www.goadex.com", "Access-Control-Request-Method": "POST"})
+    assert ok.status_code == 204 and ok.headers["access-control-allow-origin"] == "https://www.goadex.com"
+    evil = c.options("/api/waitlist", headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "POST"})
+    assert "access-control-allow-origin" not in evil.headers
+    adm = c.options("/api/admin/waitlist", headers={"Origin": "https://www.goadex.com", "Access-Control-Request-Method": "GET"})
+    assert "access-control-allow-origin" not in adm.headers  # admin APIs are never cross-origin
+    assert "access-control-allow-credentials" not in ok.headers
