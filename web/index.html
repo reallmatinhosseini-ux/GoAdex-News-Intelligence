@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f5f1">
+  <title>GoAdex News Intelligence</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2315140f'/%3E%3Cpath d='M9 21l5-6 3.5 3L23 11' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;560;600;650&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar" id="topbar">
+      <a class="brand" href="/app#/">
+        <div class="brand-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l5-6 4 3 7-9"/></svg></div>
+        <div><div class="brand-name">GoAdex</div><div class="brand-sub">News Intelligence · Gold &amp; EUR/USD</div></div>
+      </a>
+      <nav class="nav segmented" id="nav">
+        <a data-r="home" href="#/">Today</a>
+        <a data-r="news" href="#/news">News</a>
+        <a data-r="calendar" href="#/calendar">Calendar</a>
+        <a data-r="bt" href="#/backtest">Backtest</a>
+        <a data-r="system" href="#/system">System</a>
+        <a data-r="waitlist" href="#/waitlist">Waitlist</a>
+      </nav>
+      <button class="logout-btn" id="logout-d" title="Log out" aria-label="Log out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
+      <button class="menu-btn" id="menu-btn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <div class="ticker" id="ticker" title="Live XAU/USD · refreshes every 5 s"><span class="pulse"></span><b>XAU/USD</b><span id="tk-price">—</span><em id="tk-ask" class="hide-sm"></em><em id="tk-chg"></em></div>
+    </header>
+    <div class="menu-sheet" id="menu-sheet" hidden>
+      <a href="#/" data-r="home"><b>Today</b><span>Next release, T-30 / T-2 forecasts, live prices</span></a>
+      <a href="#/news" data-r="news"><b>Recent News</b><span>Market-moving headlines for Gold, USD and EUR</span></a>
+      <a href="#/calendar" data-r="calendar"><b>Calendar</b><span>Every economic release, consensus, actuals</span></a>
+      <a href="#/backtest" data-r="bt"><b>Backtest</b><span>How accurate the forecasts have been</span></a>
+      <a href="#/system" data-r="system"><b>System</b><span>Data sources, history, model readiness</span></a>
+      <a href="#/waitlist" data-r="waitlist"><b>Waitlist &amp; investors</b><span>Early-access and investor submissions</span></a>
+      <button class="menu-logout" id="logout-m">Log out</button>
+    </div>
+    <main id="app"></main>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

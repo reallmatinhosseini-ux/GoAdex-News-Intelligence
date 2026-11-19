@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f6f2">
+  <title>GoAdex — News intelligence for Gold &amp; EUR/USD</title>
+  <meta name="description" content="A GoAdex Holding product. GoAdex researches every major economic release, publishes a direction for Gold and EUR/USD 30 minutes before the news, updates it 2 minutes before, and proves its accuracy with transparent backtests.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2315140f'/%3E%3Cpath d='M9 21l5-6 3.5 3L23 11' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;560;600;650;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/landing.css">
+</head>
+<body class="lx" data-page="home">
+  <div class="x-progress" id="progress"></div>
+  <div class="x-aura" aria-hidden="true"><i class="a1"></i><i class="a2"></i><i class="a3"></i></div>
+  <div class="x-grid" aria-hidden="true"></div>
+
+  <header class="x-nav" id="nav">
+    <div class="x-nav-in">
+      <a class="brand" href="/">
+        <div class="brand-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l5-6 4 3 7-9"/></svg></div>
+        <div class="brand-name">GoAdex</div>
+      </a>
+      <nav class="x-links">
+        <a href="#product">Product</a><a href="#timeline">How it works</a><a href="#record">Track record</a><a href="#calendar">Calendar</a><a href="/investors">Investors</a><a href="#faq">FAQ</a>
+      </nav>
+      <div class="x-nav-cta">
+        <a class="x-link-sm" href="/login">Sign in</a>
+        <a class="btn btn-primary btn-sm magnetic" href="#join">Get early access
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ═══ HERO ═══ -->
+    <section class="x-hero" id="join">
+      <a class="x-pill" href="#timeline" data-reveal>
+        <span class="x-pill-dot"></span><span>Private beta</span><b>A GoAdex Holding product · forecasts at T-30 &amp; T-2</b>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+      </a>
+      <h1 class="x-h1" id="headline">
+        <span class="w">Know</span> <span class="w">the</span> <span class="w">move</span><br>
+        <span class="w">before</span> <span class="w rot-wrap"><span class="rot" id="rot"><span>CPI</span><span>NFP</span><span>FOMC</span><span>PCE</span><span>GDP</span><span>CPI</span></span></span> <span class="w">hits.</span>
+      </h1>
+      <p class="x-sub" data-reveal style="--d:.35s">GoAdex researches every major economic release on its own, publishes a direction for <b>Gold</b> and <b>EUR/USD</b> thirty minutes before the number, sharpens it two minutes before — and proves every call with transparent backtests.</p>
+
+      <form class="x-wl" data-wl data-reveal style="--d:.45s" novalidate>
+        <div class="x-wl-box">
+          <input class="x-wl-in" type="email" name="email" placeholder="Enter your work email" autocomplete="email" required aria-label="Email address">
+          <select class="x-wl-sel" name="interest" aria-label="What do you trade?">
+            <option value="both">Gold + EUR/USD</option><option value="gold">Gold</option><option value="eurusd">EUR/USD</option>
+          </select>
+          <button class="btn btn-primary x-wl-btn magnetic" type="submit"><span>Join the waitlist</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+        <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="x-wl-msg" role="status">Invite-only early access · No spam, ever.</p>
+      </form>
+
+      <div class="x-stage" id="stage">
+        <div class="x-device" id="device">
+          <div class="x-dev-bar">
+            <i></i><i></i><i></i>
+            <div class="x-dev-url"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>goadex · news intelligence</div>
+          </div>
+          <div class="x-dev-body">
+            <div class="x-chart-card">
+              <div class="x-chart-head">
+                <div>
+                  <div class="x-seg" id="seg"><button class="on" data-i="XAUUSD">Gold</button><button data-i="EURUSD">EUR/USD</button><span class="x-seg-ink"></span></div>
+                  <div class="x-price"><b id="px">—</b><span class="x-chg" id="chg"></span></div>
+                  <div class="x-price-sub"><span class="live-dot"></span><span id="px-sub">Live bid/ask · updates every 5s</span></div>
+                </div>
+                <div class="x-range">Last 12 hours</div>
+              </div>
+              <div class="x-canvas-wrap"><canvas id="chart" aria-label="Live price chart, last 12 hours" role="img"></canvas><div class="x-chart-empty" id="chart-empty">Recording live prices…</div></div>
+            </div>
+            <div class="x-fc">
+              <div class="x-fc-tag">Example layout · not a live forecast</div>
+              <div class="x-fc-top"><span class="x-fc-stage">T-30 FORECAST</span><span class="x-fc-ev">US CPI m/m</span></div>
+              <div class="x-fc-asset"><b>Gold</b><span class="dir bear">▼ SELL · Bearish</span></div>
+              <div class="x-fc-bars">
+                <div><span>Bearish</span><i><em style="--w:62%"></em></i><b>62%</b></div>
+                <div><span>Bullish</span><i><em class="g" style="--w:24%"></em></i><b>24%</b></div>
+                <div><span>Flat</span><i><em class="n" style="--w:14%"></em></i><b>14%</b></div>
+              </div>
+              <div class="x-fc-grid">
+                <div><span>Scenario</span><b>D · Down, then up</b></div>
+                <div><span>First 5 min</span><b class="neg">▼ Down</b></div>
+                <div><span>After 60 min</span><b class="pos">▲ Up</b></div>
+              </div>
+              <div class="x-fc-ev2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h7"/></svg>Evidence · sources &amp; timestamps · research log</div>
+            </div>
+          </div>
+        </div>
+        <div class="x-float f1"><span class="x-ico g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg></span><div><b>T-2 update published</b><small>What changed since T-30</small></div></div>
+        <div class="x-float f2"><span class="x-ico a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 8v5l3 2"/><circle cx="12" cy="12" r="9"/></svg></span><div><b>Official actual released</b><small>Scored at 1 · 5 · 15 · 30 · 60 min</small></div></div>
+        <div class="x-float f3"><span class="x-ico i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></span><div><b>Insufficient Evidence</b><small>Said plainly — never a guess</small></div></div>
+      </div>
+    </section>
+
+    <!-- ═══ SOURCES ═══ -->
+    <section class="x-marquee" aria-label="Data sources">
+      <p>Built on official, timestamped data</p>
+      <div class="x-mq"><div class="x-mq-track">
+        <span>Federal Reserve</span><span>European Central Bank</span><span>Bureau of Economic Analysis</span><span>Bureau of Labor Statistics</span><span>FRED · ALFRED</span><span>US Treasury</span><span>CFTC</span><span>Swissquote</span><span>Dukascopy</span><span>ECB Data Portal</span>
+        <span>Federal Reserve</span><span>European Central Bank</span><span>Bureau of Economic Analysis</span><span>Bureau of Labor Statistics</span><span>FRED · ALFRED</span><span>US Treasury</span><span>CFTC</span><span>Swissquote</span><span>Dukascopy</span><span>ECB Data Portal</span>
+      </div></div>
+    </section>
+
+    <!-- ═══ STATS ═══ -->
+    <section class="x-wrap x-stats">
+      <div class="x-stat" data-reveal><b data-count="releases">0</b><span>historical releases in the research database</span></div>
+      <div class="x-stat" data-reveal style="--d:.08s"><b data-count="reactions">0</b><span>measured market reactions, minute by minute</span></div>
+      <div class="x-stat" data-reveal style="--d:.16s"><b data-count="ticks">0</b><span>live price quotes recorded every 10 seconds</span></div>
+      <div class="x-stat" data-reveal style="--d:.24s"><b data-count="news">0</b><span>market-moving headlines classified</span></div>
+      <p class="x-stats-note" data-reveal>Live counts from the GoAdex database — they grow while you read.</p>
+    </section>
+
+    <!-- ═══ TIMELINE ═══ -->
+    <section class="x-timeline" id="timeline">
+      <div class="x-wrap x-tl-in">
+        <div class="x-tl-sticky">
+          <div class="x-kicker">How it works</div>
+          <h2 class="x-h2">The thirty minutes <br>before the number.</h2>
+          <div class="x-clock">
+            <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" class="trk"/><circle cx="60" cy="60" r="52" class="arc" id="tl-arc"/></svg>
+            <div class="x-clock-t"><b id="tl-time">T-7d</b><small id="tl-label">Research begins</small></div>
+          </div>
+        </div>
+        <ol class="x-tl-steps" id="tl-steps">
+          <li data-t="T-7d" data-l="Research begins" data-p="0.08">
+            <span class="x-tl-n">01</span><h3>Research, days ahead</h3>
+            <p>A week before each release GoAdex starts collecting inflation, jobs, rates, real yields, the dollar, positioning and consensus — from official sources, with every source it checked written to a research log.</p>
+            <div class="x-tags"><i>Real yields</i><i>DXY</i><i>Consensus</i><i>CFTC positioning</i><i>Leading data</i></div>
+          </li>
+          <li data-t="T-30" data-l="Forecast published" data-p="0.4">
+            <span class="x-tl-n">02</span><h3>T-30 · the forecast</h3>
+            <p>Thirty minutes before the announcement: Bullish, Bearish or two-way for Gold and EUR/USD — the expected first move and final direction — or an honest “Insufficient Evidence”.</p>
+            <div class="x-mini-dir"><span class="dir bull">▲ BUY · Bullish</span><span class="dir neutral">⇅ Two-way</span><span class="dir insufficient">Insufficient Evidence</span></div>
+          </li>
+          <li data-t="T-2" data-l="Final update" data-p="0.72">
+            <span class="x-tl-n">03</span><h3>T-2 · the final update</h3>
+            <p>Two minutes before: refreshed with live prices recorded every ten seconds, plus an explicit list of what changed since T-30. The record is fingerprinted and can’t be edited later.</p>
+            <div class="x-diff"><div><em>−</em>Gold momentum: flat</div><div class="p"><em>+</em>Gold momentum: falling into release</div></div>
+          </li>
+          <li data-t="T+60" data-l="Scored" data-p="1">
+            <span class="x-tl-n">04</span><h3>T+60 · scored, publicly</h3>
+            <p>After the release every forecast is scored at 1, 5, 15, 30 and 60 minutes — first move, final move and reversal tested separately. Wins and losses stay on the record.</p>
+            <div class="x-score"><span>1m</span><span>5m</span><span>15m</span><span>30m</span><span>60m</span></div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ═══ SCENARIOS ═══ -->
+    <section class="x-wrap x-sec" id="scenarios">
+      <div class="x-head" data-reveal>
+        <div class="x-kicker">Beyond up or down</div>
+        <h2 class="x-h2">Four ways a release can play out.<br><span class="muted">GoAdex tells you which is most likely.</span></h2>
+      </div>
+      <div class="x-scen">
+        <article class="x-sc" data-reveal>
+          <svg viewBox="0 0 220 110" class="x-sc-svg"><path class="base" d="M10 85 H210"/><path class="ln up" d="M10 82 C40 80 50 60 80 55 S130 35 150 30 S190 18 210 14"/><circle r="5" class="dot up"><animateMotion dur="3.4s" repeatCount="indefinite" path="M10 82 C40 80 50 60 80 55 S130 35 150 30 S190 18 210 14"/></circle></svg>
+          <div class="x-sc-l">A</div><h3>Bullish continuation</h3><p>Rises on the number and keeps rising for the hour.</p>
+        </article>
+        <article class="x-sc" data-reveal style="--d:.08s">
+          <svg viewBox="0 0 220 110" class="x-sc-svg"><path class="base" d="M10 85 H210"/><path class="ln dn" d="M10 18 C40 20 50 40 80 48 S130 70 150 76 S190 88 210 94"/><circle r="5" class="dot dn"><animateMotion dur="3.4s" repeatCount="indefinite" path="M10 18 C40 20 50 40 80 48 S130 70 150 76 S190 88 210 94"/></circle></svg>
+          <div class="x-sc-l">B</div><h3>Bearish continuation</h3><p>Drops on the number and keeps falling.</p>
+        </article>
+        <article class="x-sc" data-reveal style="--d:.16s">
+          <svg viewBox="0 0 220 110" class="x-sc-svg"><path class="base" d="M10 85 H210"/><path class="ln up" d="M10 70 C30 66 45 20 70 18 S110 50 140 70 S190 92 210 94"/><circle r="5" class="dot up"><animateMotion dur="3.4s" repeatCount="indefinite" path="M10 70 C30 66 45 20 70 18 S110 50 140 70 S190 92 210 94"/></circle></svg>
+          <div class="x-sc-l">C</div><h3>Spike up, then fade</h3><p>A quick pop that reverses into a lower close.</p>
+        </article>
+        <article class="x-sc" data-reveal style="--d:.24s">
+          <svg viewBox="0 0 220 110" class="x-sc-svg"><path class="base" d="M10 85 H210"/><path class="ln dn" d="M10 40 C30 44 45 92 70 94 S110 60 140 40 S190 20 210 16"/><circle r="5" class="dot dn"><animateMotion dur="3.4s" repeatCount="indefinite" path="M10 40 C30 44 45 92 70 94 S110 60 140 40 S190 20 210 16"/></circle></svg>
+          <div class="x-sc-l">D</div><h3>Flush down, then recover</h3><p>A fast drop that reverses into a higher close.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ═══ BENTO ═══ -->
+    <section class="x-wrap x-sec" id="product">
+      <div class="x-head" data-reveal>
+        <div class="x-kicker">The platform</div>
+        <h2 class="x-h2">Everything a news trader needs.<br><span class="muted">Nothing they don’t.</span></h2>
+      </div>
+      <div class="x-bento">
+        <div class="x-b b-evid spot" data-reveal>
+          <div class="x-b-t"><h3>Evidence for every call</h3><p>Each factor, its value, its source and timestamp — and how strongly it leaned.</p></div>
+          <div class="x-evid">
+            <div><span>Real yield 10y</span><i><em class="neg" style="--w:78%"></em></i></div>
+            <div><span>Dollar index</span><i><em class="neg" style="--w:61%"></em></i></div>
+            <div><span>Consensus surprise</span><i><em class="pos" style="--w:44%"></em></i></div>
+            <div><span>Positioning (CFTC)</span><i><em class="pos" style="--w:30%"></em></i></div>
+            <div><span>Similar past releases</span><i><em class="neg" style="--w:55%"></em></i></div>
+          </div>
+        </div>
+        <div class="x-b b-news spot" data-reveal style="--d:.06s">
+          <div class="x-b-t"><h3>Market-moving news</h3><p>Central banks and trusted outlets, tagged by what they move.</p></div>
+          <div class="x-news-stack">
+            <div class="x-news"><b>Fed</b><span>Policy statement released</span><i class="g">Gold</i></div>
+            <div class="x-news"><b>ECB</b><span>Rate decision and press release</span><i class="e">EUR</i></div>
+            <div class="x-news"><b>BEA</b><span>GDP advance estimate</span><i class="u">USD</i></div>
+            <div class="x-news"><b>Geo</b><span>Risk headline flagged</span><i class="r">Risk</i></div>
+          </div>
+        </div>
+        <div class="x-b b-cal spot" data-reveal style="--d:.12s">
+          <div class="x-b-t"><h3>Next releases</h3><p>Real calendar, live countdowns.</p></div>
+          <ul class="x-next" id="next"><li class="x-next-empty">Loading calendar…</li></ul>
+        </div>
+        <div class="x-b b-bt spot" data-reveal>
+          <div class="x-b-t"><h3>Transparent backtesting</h3><p>Walk-forward, out-of-sample only. Live forecasts and replays never mixed.</p></div>
+          <div class="x-bt">
+            <div class="x-bt-bars"><i style="--h:42%"></i><i style="--h:58%"></i><i style="--h:36%"></i><i style="--h:66%"></i><i style="--h:51%"></i><i style="--h:72%"></i><i style="--h:47%"></i><i style="--h:63%"></i><i style="--h:55%"></i><i style="--h:69%"></i><i style="--h:44%"></i><i style="--h:60%"></i></div>
+            <div class="x-bt-gate"><span>Publish gate</span><b>≥ 60 unseen calls · lower bound &gt; 50%</b></div>
+          </div>
+        </div>
+        <div class="x-b b-alert spot" data-reveal style="--d:.06s">
+          <div class="x-b-t"><h3>Instant alerts</h3><p>The moment a forecast, update or official figure lands.</p></div>
+          <div class="x-alerts">
+            <div class="x-al"><span class="x-ico g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7"/></svg></span><div><b>T-30 forecast ready</b><small>US CPI · Gold &amp; EUR/USD</small></div><time>now</time></div>
+            <div class="x-al"><span class="x-ico a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg></span><div><b>Actual released</b><small>Official value recorded</small></div><time>2m</time></div>
+          </div>
+        </div>
+        <div class="x-b b-lock spot" data-reveal style="--d:.12s">
+          <div class="x-b-t"><h3>Immutable record</h3><p>Every forecast is fingerprinted with SHA-256 the moment it’s published.</p></div>
+          <code class="x-hash" id="hash">a3f9 1c07 e5b2 88d4 0f6a 2e91 7c3b d150</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TRACK RECORD (real) ═══ -->
+    <section class="x-wrap x-sec" id="record">
+      <div class="x-head" data-reveal>
+        <div class="x-kicker">Track record</div>
+        <h2 class="x-h2">Proof, not promises.<br><span class="muted">Live validation data.</span></h2>
+        <p>Every model is replayed on releases it has never seen. It may publish only after at least sixty out-of-sample calls with a 95% lower bound above a coin flip. Until then its calls are recorded privately as shadow calls — and shown here exactly as they are.</p>
+      </div>
+      <div class="x-tr">
+        <div class="x-tr-big" data-reveal>
+          <div class="x-kicker">Models cleared to publish</div>
+          <div class="n"><span id="tr-cleared">—</span><small> / <span id="tr-total">4</span></small></div>
+          <p id="tr-cleared-l">Loading validation status…</p>
+          <div class="x-gate">
+            <div><span>Out-of-sample calls</span><b id="g-n">≥ 60</b></div>
+            <div><span>95% lower bound</span><b>&gt; 50%</b></div>
+            <div><span>Brier score</span><b>&lt; 0.25</b></div>
+          </div>
+        </div>
+        <div class="x-models" id="models"></div>
+      </div>
+      <p class="x-tr-note" id="tr-note">Shadow calls are produced and scored exactly like published ones but are never shown to users.</p>
+    </section>
+
+    <!-- ═══ CALENDAR (real) ═══ -->
+    <section class="x-wrap x-sec" id="calendar">
+      <div class="x-head" data-reveal>
+        <div class="x-kicker">Economic calendar</div>
+        <h2 class="x-h2">The whole week, live.<br><span class="muted">Releases GoAdex covers are marked.</span></h2>
+      </div>
+      <div class="x-cal" data-reveal>
+        <div class="x-cal-bar">
+          <div class="x-cal-tools">
+            <div class="x-seg" id="cal-week"><button class="on" data-w="0">This week</button><button data-w="1">Next week</button><span class="x-seg-ink"></span></div>
+            <div class="x-chips" id="cal-filter"><button class="on" data-f="all">All</button><button data-f="high">High impact</button><button data-f="cov">Covered</button></div>
+          </div>
+          <span class="x-tz" id="cal-tz"></span>
+        </div>
+        <div class="x-cal-scroll">
+          <table>
+            <thead><tr><th>Time</th><th class="c">Cur.</th><th>Impact</th><th>Event</th><th class="n">Actual</th><th class="n">Forecast</th><th class="n p">Previous</th></tr></thead>
+            <tbody id="cal-body"><tr class="x-cal-empty"><td colspan="7">Loading calendar…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="x-cal-foot"><span><span class="x-imp high"><i></i><i></i><i></i></span>&nbsp; Impact</span><span><span class="x-cov" style="margin:0">Covered</span>&nbsp; GoAdex forecasts this release</span><span>Source: weekly economic calendar · official schedules</span></div>
+      </div>
+    </section>
+
+    <!-- ═══ GOADEX HOLDING ═══ -->
+    <section class="x-wrap x-sec" id="holding">
+      <div class="x-hold">
+        <div class="x-hold-l spot" data-reveal>
+          <div class="x-kicker">GoAdex Holding</div>
+          <h2 class="x-h2">A long-term fintech initiative.</h2>
+          <p>GoAdex News Intelligence is developed by GoAdex Holding — the first product in a research-led platform built on real economic data, quantitative models and a published, verifiable record. It is a research and forecasting product, not a gambling platform: no positions, no stakes, no guaranteed outcomes.</p>
+          <a class="btn btn-primary magnetic" href="/investors">Investor relations
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="x-amt-card" data-reveal style="--d:.08s">
+          <div class="x-kicker">Proposed initial commitment</div>
+          <div class="x-amt">$100,000</div>
+          <span class="x-stamp">Proposed — not yet secured</span>
+          <p>Planned to take the platform from private beta to a validated, publicly verifiable product. Not yet committed or invested.</p>
+          <div class="x-kv">
+            <div><span>Stage</span><b>Private beta</b></div>
+            <div><span>Coverage</span><b>Gold · EUR/USD</b></div>
+            <div><span>Inviting</span><b>VCs · institutions · partners</b></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ HONESTY ═══ -->
+    <section class="x-wrap x-sec">
+      <div class="x-honest" data-reveal>
+        <div class="x-honest-l">
+          <div class="x-kicker">Our standard</div>
+          <h2 class="x-h2">No invented<br>numbers. <em>Ever.</em></h2>
+          <p>Most “signals” show you confidence. GoAdex shows you evidence — and says so when there isn’t enough.</p>
+        </div>
+        <ul class="x-checks">
+          <li data-reveal><span class="ck"></span><div><b>Validated before published.</b> A direction appears only after its model beats a coin flip on releases it never saw.</div></li>
+          <li data-reveal style="--d:.08s"><span class="ck"></span><div><b>“Insufficient Evidence” is an answer.</b> When the data can’t support a call, GoAdex says so instead of guessing.</div></li>
+          <li data-reveal style="--d:.16s"><span class="ck"></span><div><b>No look-ahead.</b> Built only from information published before the release, with official publication lags respected.</div></li>
+          <li data-reveal style="--d:.24s"><span class="ck"></span><div><b>Real prices, real sources.</b> Live bid/ask quotes and official statistics — never simulated data.</div></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ═══ COMPARE ═══ -->
+    <section class="x-wrap x-sec">
+      <div class="x-head" data-reveal>
+        <div class="x-kicker">Why GoAdex</div>
+        <h2 class="x-h2">Built differently from signal groups.</h2>
+      </div>
+      <div class="x-cmp" data-reveal>
+        <div class="x-cmp-row h"><span></span><b>Typical signal channel</b><b class="me">GoAdex</b></div>
+        <div class="x-cmp-row"><span>Shows the evidence behind each call</span><i class="no"></i><i class="yes"></i></div>
+        <div class="x-cmp-row"><span>Says “not enough evidence” instead of guessing</span><i class="no"></i><i class="yes"></i></div>
+        <div class="x-cmp-row"><span>Forecast locked before the release</span><i class="no"></i><i class="yes"></i></div>
+        <div class="x-cmp-row"><span>Every call scored, including losses</span><i class="no"></i><i class="yes"></i></div>
+        <div class="x-cmp-row"><span>First move and reversal forecast separately</span><i class="no"></i><i class="yes"></i></div>
+        <div class="x-cmp-row"><span>Out-of-sample validation gate</span><i class="no"></i><i class="yes"></i></div>
+      </div>
+    </section>
+
+    <!-- ═══ FAQ ═══ -->
+    <section class="x-wrap x-sec x-faq-sec" id="faq">
+      <div class="x-head" data-reveal><div class="x-kicker">FAQ</div><h2 class="x-h2">Questions, answered.</h2></div>
+      <div class="x-faq">
+        <details data-reveal><summary>How accurate is GoAdex?</summary><div><p>We only report accuracy measured out of sample on real price data, with the uncertainty shown next to it — see the live track record above. We won’t quote a win rate we can’t prove.</p></div></details>
+        <details data-reveal><summary>Which markets and releases does it cover?</summary><div><p>Gold (XAUUSD) and EUR/USD around major US and euro-area releases: FOMC, CPI, NFP, PCE, GDP, PPI, retail sales, FOMC minutes and more.</p></div></details>
+        <details data-reveal><summary>Why would it say “Insufficient Evidence”?</summary><div><p>Because a guess dressed up as a forecast is worse than no forecast. If a model hasn’t passed validation, or the inputs are stale, GoAdex tells you exactly that.</p></div></details>
+        <details data-reveal><summary>Is this gambling?</summary><div><p>No. GoAdex is a data-driven research and forecasting product built by GoAdex Holding. It doesn’t take positions or accept stakes. Forecasts are probabilistic and can be wrong; trading involves risk.</p></div></details>
+        <details data-reveal><summary>When can I get access?</summary><div><p>GoAdex is in private beta. Join the waitlist and we’ll email you when your spot opens.</p></div></details>
+        <details data-reveal><summary>I’m an investor. Who do I talk to?</summary><div><p>Visit <a href="/investors" style="text-decoration:underline">Investor relations</a> and register your interest — GoAdex Holding reviews every submission.</p></div></details>
+      </div>
+    </section>
+
+    <!-- ═══ CTA ═══ -->
+    <section class="x-wrap x-sec">
+      <div class="x-cta" data-reveal>
+        <div class="x-cta-glow" aria-hidden="true"></div>
+        <div class="x-kicker">Private beta</div>
+        <h2>Trade the news<br><em>with evidence.</em></h2>
+        <p>Join the waitlist for early access to GoAdex News Intelligence.</p>
+        <form class="x-wl" data-wl novalidate>
+          <div class="x-wl-box">
+            <input class="x-wl-in" type="email" name="email" placeholder="Enter your email" autocomplete="email" required aria-label="Email address">
+            <input type="hidden" name="interest" value="both">
+            <button class="btn btn-primary x-wl-btn magnetic" type="submit"><span>Get early access</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          </div>
+          <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <p class="x-wl-msg" role="status">We’ll only use your email to contact you about GoAdex.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="x-foot">
+    <div class="x-wrap x-foot-in">
+      <div class="x-foot-brand">
+        <a class="brand" href="/"><div class="brand-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l5-6 4 3 7-9"/></svg></div><div class="brand-name">GoAdex</div></a>
+        <p>News intelligence for Gold and EUR/USD. A GoAdex Holding product.</p>
+      </div>
+      <div class="x-foot-cols">
+        <div><b>Product</b><a href="#product">Platform</a><a href="#timeline">How it works</a><a href="#record">Track record</a><a href="#calendar">Calendar</a></div>
+        <div><b>Company</b><a href="/investors">Investors</a><a href="#faq">FAQ</a><a href="#join">Waitlist</a><a href="/login">Admin sign in</a></div>
+      </div>
+    </div>
+    <div class="x-wrap x-foot-legal"><span>© <span id="yr"></span> GoAdex Holding</span><span>Research and analytics only — not investment advice. Forecasts are probabilistic and can be wrong.</span></div>
+    <div class="x-foot-word" aria-hidden="true">GoAdex</div>
+  </footer>
+
+  <script src="/static/landing.js"></script>
+</body>
+</html>
